@@ -15,6 +15,7 @@ const PageWrapper = styled.div`
 
 const ContentWrapper = styled.div`
   padding: 2rem;
+  margin-top: 4rem;
 `;
 
 const Header = styled.div`
@@ -100,6 +101,15 @@ const EventTag = styled.div`
   font-size: 0.95rem;
 `;
 
+const Navbar = styled.nav`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 4rem;
+  z-index: 1000;
+  background-color: #1a237e;
+`;
+
 const NoData = styled.p`
   text-align: center;
   color: #999;
@@ -172,7 +182,7 @@ const AdminFeedbackPage = () => {
                   {currentFeedback.length > 0 ? (
                     currentFeedback.map((fb) => (
                       <FeedbackItem key={fb._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-                        <UserInfo>User ID: {fb.userId}</UserInfo>
+                        {/* <UserInfo>User ID: {fb.userId}</UserInfo> */}
                         <UserInfo>User Name: {fb.userName}</UserInfo>
                         <Message>"{fb.feedbackMessage?.trim()}"</Message>
                         <EventTag>Event Title: {fb.eventTitle}</EventTag>
