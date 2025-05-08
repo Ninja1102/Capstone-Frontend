@@ -1,0 +1,284 @@
+.hero-section {
+  min-height: 100vh;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.hero-section.dark {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(45deg, #4a90e2, #8e44ad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.description {
+  font-size: 1.2rem;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.get-started-button, .know-more-button {
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.get-started-button {
+  background: linear-gradient(45deg, #4a90e2, #8e44ad);
+  color: white;
+}
+
+.know-more-button {
+  background: transparent;
+  border: 2px solid #4a90e2;
+  color: #4a90e2;
+}
+
+.theme-toggle-button {
+  padding: 0.8rem;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid #4a90e2;
+  color: #4a90e2;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.get-started-button:hover, .know-more-button:hover, .theme-toggle-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.section-title {
+  font-size: 2.5rem;
+  text-align: center;
+  margin: 4rem 0 2rem;
+  font-weight: bold;
+}
+
+.section-title.gradient {
+  background: linear-gradient(45deg, #4a90e2, #8e44ad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.features-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.feature-item {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.feature-item.blue {
+  background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
+  color: white;
+}
+
+.feature-item h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feature-item p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.team-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.image-container {
+  width: 100%;
+  padding-top: 100%;
+  position: relative;
+}
+
+.image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.content h4 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.social-links a {
+  color: #4a90e2;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+  transform: translateY(-2px);
+  color: #8e44ad;
+}
+
+/* Dark theme styles */
+.hero-section.dark .feature-item {
+  background: #2d2d2d;
+  color: #ffffff;
+}
+
+.hero-section.dark .team-card {
+  background: #2d2d2d;
+  color: #ffffff;
+}
+
+.hero-section.dark .know-more-button {
+  border-color: #8e44ad;
+  color: #8e44ad;
+}
+
+.hero-section.dark .theme-toggle-button {
+  border-color: #8e44ad;
+  color: #8e44ad;
+}
+
+/* Animation keyframes */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2.5rem;
+  }
+  
+  .description {
+    font-size: 1rem;
+  }
+  
+  .button-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .get-started-button, .know-more-button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .features-section {
+    grid-template-columns: 1fr;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Hover effects */
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .hero-section,
+  .get-started-button,
+  .know-more-button,
+  .theme-toggle-button,
+  .feature-item,
+  .team-card,
+  .social-links a {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .hero-section {
+    padding: 0;
+  }
+
+  .button-container {
+    display: none;
+  }
+
+  .feature-item,
+  .team-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

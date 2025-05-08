@@ -1,0 +1,121 @@
+/* Center the cards container */
+import 
+.cards {
+    position: relative;
+    list-style-type: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 34em;
+    height: auto;
+    display: flex;
+    justify-content: center; /* Horizontally center the cards */
+    align-items: flex-start; /* Align items at the top */
+    flex-direction: column;
+    margin-top: 20vh; /* Center cards from the top with 20% margin */
+  }
+  
+  /* Individual Card Styling */
+  .card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background: #ccc;
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 0 40px #000;
+    transform: translateY(0) rotate(4deg) translateX(25px) scale(1);
+    transform-origin: 0 0;
+    transition: transform 0.6s cubic-bezier(.8, .2, .1, 0.8) 0.1s, background 0.4s linear;
+    cursor: pointer;
+    user-select: none;
+    width: 100%;
+    max-width: 350px; /* Limit card width */
+    height: auto;
+    box-sizing: border-box;
+  }
+  
+  /* Styling for the next card */
+  .card--next {
+    z-index: 5;
+    transform: translateY(-25px) rotate(4deg) translateX(25px) scale(1);
+  }
+  
+  /* Styling for the out-of-view card */
+  .card--out {
+    animation: card-out 0.6s cubic-bezier(.8, .2, .1, 0.8);
+    transform: translateY(-50px) rotate(8deg) translateX(55px) scale(0.95);
+    z-index: 1;
+    background: #bbb;
+  }
+  
+  /* Keyframes for the out-of-view card animation */
+  @keyframes card-out {
+    0% {
+      z-index: 20;
+      transform: translateY(0px) rotate(-4deg);
+    }
+    50% {
+      transform: translateY(-120%) rotate(-5deg) translateX(-40px);
+    }
+    80% {
+      z-index: 1;
+    }
+    100% {
+      transform: translateY(-50px) rotate(8deg) translateX(55px) scale(0.95);
+    }
+  }
+  
+  /* Styling for the current card */
+  .card--current {
+    cursor: auto;
+    user-select: auto;
+    position: relative;
+    z-index: 10;
+    opacity: 1;
+    background: #EEE;
+    transform: rotate(-1deg) translateX(0%) scale(1);
+  }
+  
+  /* Image Styling */
+  .card-image {
+    width: 100%; /* Ensure all images are the same size */
+    height: auto; /* Maintain aspect ratio */
+    max-height: 200px; /* Adjust this height according to your needs */
+    object-fit: cover; /* Makes sure the image covers the area without distorting */
+    border-radius: 20px;
+    margin-bottom: 20px; /* Add spacing between image and text */
+  }
+  
+  /* Ignore Button Styling */
+  .ignore-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #ff6347;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    display: block;
+    width: 100%;
+  }
+  
+  .ignore-button:hover {
+    background-color: #ff4500;
+  }
+  
+  /* Title Styling */
+  h1 {
+    margin: 0;
+    font-size: 1.5rem; /* Adjust title size */
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  /* General Page Styling */
+  html, body {
+    height: 100%;
+  }
+  
+
+  
