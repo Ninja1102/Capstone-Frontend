@@ -17,98 +17,86 @@ const Schedule = () => {
   const [newReminder, setNewReminder] = useState({
     eventId: '',
     needsSms: false,
-    needsCall: false, 
+    needsCall: false,
     needsEmail: false
   });
 
   const token = sessionStorage.getItem('jwtToken');
   const userId = sessionStorage.getItem('userId');
 
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    fetchAllData();
+    const intervalId = setInterval(fetchAllData, 30000); // 30s
 
-    const fetchAllData = async () => {
-      try {
-        // Get all events
-        const eventsResponse = await axios.get(`http://localhost:9997/event/getAllEvents`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+    return () => clearInterval(intervalId); // Cleanup
+  }, []);
 
-        const reminderResponse = await axios.get(`http://localhost:9997/reminder/getbyUserId/${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const reminderEventIds = new Set(
-          reminderResponse.data
-            .filter(reminder => reminder.event && reminder.event.eventId) // Filter out nulls or missing eventId
-            .map(reminder => reminder.event.eventId)
-        );
-        
-        const formattedEvents = eventsResponse.data.map(event => {
+  const fetchAllData = async () => {
+    try {
+      const [eventsRes, remindersRes] = await Promise.all([
+        axios.get(`http://localhost:9997/event/getAllEvents`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        axios.get(`http://localhost:9997/reminder/getbyUserId/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      const now = new Date();
+      const reminderEventIds = new Set(
+        remindersRes.data
+          .filter(r => r.event?.eventId)
+          .map(r => r.event.eventId)
+      );
+
+      const futureEvents = eventsRes.data
+        .filter(e => new Date(e.eventDate) >= now)
+        .map(event => {
           const eventDate = new Date(event.eventDate);
           const hasReminder = reminderEventIds.has(event.eventId);
+
+          // Add check to exclude reminders for the event posted by the logged-in user
+          const shouldShowReminder = event.userId !== userId; // Exclude own events
+
           return {
             id: event.eventId,
             title: event.eventTitle,
             start: eventDate,
-            end: new Date(eventDate.setHours(eventDate.getHours() + 1)),
+            end: new Date(eventDate.getTime() + 60 * 60 * 1000),
             description: event.eventDescription,
-            reminderSet: hasReminder,
+            reminderSet: hasReminder && shouldShowReminder,
             allDay: false,
             eventImg: event.eventImg,
             eventData: event
           };
         });
-        setEvents(formattedEvents);
 
-        const currentDate = new Date();
-        const availableEvents = eventsResponse.data.filter(event => {
-          const eventDate = new Date(event.eventDate);
-          return !reminderEventIds.has(event.eventId) && eventDate >= currentDate;
-        });
-        setAvailableEvents(availableEvents);
-
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-  
-  useEffect(() => {
-    fetchAllData();
-  }, []);
+      setEvents(futureEvents);
+      setAvailableEvents(eventsRes.data.filter(e =>
+        new Date(e.eventDate) >= now && !reminderEventIds.has(e.eventId) && e.userId !== userId // Exclude own events for available ones
+      ));
+    } catch (error) {
+      console.error('Error fetching events/reminders:', error);
+    }
+  };
 
   const handleAddReminder = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(
-        'http://localhost:9997/reminder/create',
-        {
-          userId,
-          eventId: newReminder.eventId,
-          needSms: newReminder.needsSms,
-          needCall: newReminder.needsCall,
-          needEmail: newReminder.needsEmail,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      
-
-      setNewReminder({
-        eventId: '',
-        needsSms: false,
-        needsCall: false,
-        needsEmail: false
+      await axios.post('http://localhost:9997/reminder/create', {
+        userId,
+        eventId: newReminder.eventId,
+        needSms: newReminder.needsSms,
+        needCall: newReminder.needsCall,
+        needEmail: newReminder.needsEmail
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
+
+      setNewReminder({ eventId: '', needsSms: false, needsCall: false, needsEmail: false });
       setShowAddReminder(false);
-      
-
       fetchAllData();
-
     } catch (error) {
       console.error("Error creating reminder:", error);
     }
@@ -120,19 +108,15 @@ const Schedule = () => {
   };
 
   const eventStyleGetter = (event) => {
-    if (event.reminderSet) {
-      return {
-        style: {
-          backgroundColor: '#4CAF50',
-          borderRadius: '5px',
-          opacity: 0.8,
-          color: 'white',
-          border: '0px',
-          display: 'block'
-        }
-      };
-    }
-    return {};
+    return {
+      style: {
+        backgroundColor: event.reminderSet ? '#4CAF50' : '#3174ad',
+        borderRadius: '5px',
+        opacity: 0.9,
+        color: 'white',
+        border: '0px'
+      }
+    };
   };
 
   const formats = {
@@ -146,8 +130,7 @@ const Schedule = () => {
       <div className="w-full max-w-6xl bg-white rounded-xl shadow-2xl p-8 backdrop-blur-sm bg-opacity-90">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-black drop-shadow-sm underline">Schedule</h2>
-
-          <button 
+          <button
             onClick={() => setShowAddReminder(true)}
             className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-200"
           >
@@ -183,7 +166,7 @@ const Schedule = () => {
 
         {/* Comments Modal */}
         {selectedEvent && (
-          <CommentSection 
+          <CommentSection
             eventId={selectedEvent.id}
             eventData={selectedEvent.eventData}
             isOpen={showComments}
@@ -198,26 +181,24 @@ const Schedule = () => {
         {showAddReminder && (
           <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black bg-opacity-50">
             <div className="bg-white rounded-2xl shadow-lg w-full max-w-[500px]">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-2xl font-bold text-gray-800">Add Reminder</h3>
-                  <button 
-                    onClick={() => setShowAddReminder(false)}
-                    className="text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
+              <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-2xl font-bold text-gray-800">Add Reminder</h3>
+                <button
+                  onClick={() => setShowAddReminder(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-6 w-6" />
+                </button>
               </div>
-              
+
               <div className="p-6">
                 <form onSubmit={handleAddReminder} className="space-y-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Select Event</label>
                     <select
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full p-3 border border-gray-300 rounded-lg"
                       value={newReminder.eventId}
-                      onChange={(e) => setNewReminder({...newReminder, eventId: e.target.value})}
+                      onChange={(e) => setNewReminder({ ...newReminder, eventId: e.target.value })}
                       required
                     >
                       <option value="">Select an event</option>
@@ -230,55 +211,28 @@ const Schedule = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="needsSms"
-                        className="mr-2"
-                        checked={newReminder.needsSms}
-                        onChange={(e) => setNewReminder({...newReminder, needsSms: e.target.checked})}
-                      />
-                      <label htmlFor="needsSms" className="text-sm text-gray-700">Send SMS Reminder</label>
-                    </div>
-
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="needsCall"
-                        className="mr-2"
-                        checked={newReminder.needsCall}
-                        onChange={(e) => setNewReminder({...newReminder, needsCall: e.target.checked})}
-                      />
-                      <label htmlFor="needsCall" className="text-sm text-gray-700">Send Call Reminder</label>
-                    </div>
-
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="needsEmail"
-                        className="mr-2"
-                        checked={newReminder.needsEmail}
-                        onChange={(e) => setNewReminder({...newReminder, needsEmail: e.target.checked})}
-                      />
-                      <label htmlFor="needsEmail" className="text-sm text-gray-700">Send Email Reminder</label>
-                    </div>
+                    {['needsSms', 'needsCall', 'needsEmail'].map(field => (
+                      <div key={field} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={field}
+                          className="mr-2"
+                          checked={newReminder[field]}
+                          onChange={(e) => setNewReminder({ ...newReminder, [field]: e.target.checked })}
+                        />
+                        <label htmlFor={field} className="text-sm text-gray-700">
+                          {`Send ${field.replace('needs', '')} Reminder`}
+                        </label>
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
-                    <button 
-                      type="submit"
-                      className="w-full sm:w-1/2 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-200"
-                    >
-                      Create Reminder
-                    </button>
-                    <button 
-                      type="button" 
-                      className="w-full sm:w-1/2 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200"
-                      onClick={() => setShowAddReminder(false)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
+                  >
+                    Create Reminder
+                  </button>
                 </form>
               </div>
             </div>

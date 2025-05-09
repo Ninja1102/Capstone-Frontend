@@ -31,7 +31,14 @@ export default function HomePage() {
       document.documentElement.style.scrollBehavior = 'auto';
     };
   }, []);
-
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchCommunityPosts();
+    }, 10000); // Refresh every 10 seconds
+  
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+  
   const fetchCommunityPosts = async () => {
     try {
       const response = await axios.get(
