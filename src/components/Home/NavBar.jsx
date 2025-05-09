@@ -426,7 +426,7 @@ const NavBar = () => {
                       cursor: "pointer",
                     }}
                   />
-                  Call
+                  Whatsapp
                 </label>
 
                 <label

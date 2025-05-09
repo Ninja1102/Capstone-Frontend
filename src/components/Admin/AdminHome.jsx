@@ -33,7 +33,7 @@ const AdminHome = () => {
   const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
-    if (!token || userId !== '681cb71cb7e8c057857a1c67') {
+    if (!token || userId !== '681e203d4dc8fa191cfe6a2a') {
       navigate('/');
       return;
     }
@@ -184,7 +184,6 @@ const AdminHome = () => {
             {recentActivity.map((activity) => (
               <ActivityItem key={activity.id}>
                 <p>{activity.description}</p>
-                <small>{activity.timestamp}</small>
               </ActivityItem>
             ))}
           </RecentActivityContainer>

@@ -18,7 +18,7 @@ export default function HomePage() {
   const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
-    if(!userId || userId === 'undefined'){
+    if(!userId || userId === '681e1425ec0a892556a1685d'){
       navigate('/signin')
     } else {
       fetchCommunityPosts();

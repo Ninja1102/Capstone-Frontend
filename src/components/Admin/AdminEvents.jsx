@@ -4,7 +4,7 @@ import { FaSearch, FaFilter, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaChartBar,
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronLeft, ChevronRight } from 'lucide-react'; 
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const AdminEvents = () => {
   const navigate = useNavigate();
@@ -38,64 +38,60 @@ const AdminEvents = () => {
     featured: 0
   });
   const EVENTS_PER_PAGE = 3;
-  
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get('http://localhost:9997/event/getAllEvents', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const allEvents = response.data;
+
+      const now = new Date();
+      const categorizedEvents = {
+        ongoing: [],
+        upcoming: [],
+        past: [],
+        featured: []
+      };
+
+      const ADMIN_USER_ID = '681e203d4dc8fa191cfe6a2a';
+
+      allEvents.forEach(event => {
+        const eventDate = new Date(event.eventDate);
+        const isToday = eventDate.toDateString() === now.toDateString();
+        const isAdmin = event.userId === ADMIN_USER_ID;
+
+        if (!isAdmin) {
+          categorizedEvents.featured.push(event);
+        }
+
+        if (eventDate < now) {
+          categorizedEvents.past.push({ ...event, status: 'past' });
+        } else if (isToday) {
+          categorizedEvents.ongoing.push(event);
+        } else {
+          categorizedEvents.upcoming.push(event);
+        }
+      });
+
+      ['ongoing', 'upcoming', 'past', 'featured'].forEach(category => {
+        categorizedEvents[category].sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
+      });
+
+      setEvents(categorizedEvents);
+      setStats({
+        totalEvents: allEvents.length,
+        activeEvents: categorizedEvents.ongoing.length + categorizedEvents.upcoming.length,
+        totalAttendees: 0
+      });
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
 
   useEffect(() => {
-    // Fetch all events from backend
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get('http://localhost:9997/event/getAllEvents', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const allEvents = response.data;
-
-        // Categorize events based on date
-        const now = new Date();
-        const categorizedEvents = {
-          ongoing: [],
-          upcoming: [],
-          past: [],
-          featured: []
-        };
-
-        const ADMIN_USER_ID = '681cb71cb7e8c057857a1c67'; // Admin's fixed user ID
-
-        allEvents.forEach(event => {
-          const eventDate = new Date(event.eventDate);
-          const isToday = eventDate.toDateString() === now.toDateString();
-          const isAdmin = event.userId === ADMIN_USER_ID;
-
-          // Resident events pushed to featured[]
-          if (!isAdmin) {
-            categorizedEvents.featured.push(event);
-          }
-
-          if (eventDate < now) {
-            categorizedEvents.past.push({ ...event, status: 'past' });
-          } else if (isToday) {
-            categorizedEvents.ongoing.push(event);
-          } else {
-            categorizedEvents.upcoming.push(event);
-          }
-        });
-// Sort all categorized arrays by event date (earliest to latest)
-          ['ongoing', 'upcoming', 'past', 'featured'].forEach(category => {
-            categorizedEvents[category].sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
-          });
-
-        setEvents(categorizedEvents);
-        setStats({
-          totalEvents: allEvents.length,
-          activeEvents: categorizedEvents.ongoing.length + categorizedEvents.upcoming.length,
-          totalAttendees: 0
-        });
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
-
     fetchEvents();
   }, []);
 
@@ -113,15 +109,14 @@ const AdminEvents = () => {
       [category]: Math.min(prev[category] + 1, maxPage)
     }));
   };
-  
+
   const handlePrev = (category) => {
     setCurrentPage(prev => ({
       ...prev,
       [category]: Math.max(prev[category] - 1, 0)
     }));
   };
-  
-  
+
   const handleCreateEvent = () => {
     setShowEventForm(true);
   };
@@ -143,36 +138,33 @@ const AdminEvents = () => {
       const userId = sessionStorage.getItem('userId');
 
       if (formData.eventType === 'Event') {
-            console.log(formData);
-      const response = await axios.post('http://localhost:9997/event/add',
-        {
+        await axios.post('http://localhost:9997/event/add', {
           eventTitle: formData.title,
           eventDescription: formData.description,
           eventDate: localDateTime,
           eventImg: formData.imageUrl,
           eventType: formData.eventType,
           userId: userId
-        },
-        {
+        }, {
           headers: {
             Authorization: token,
-          },
-        }
-      );
-    }else {
-      const response = await axios.get('http://localhost:9997/reminder/sendUrgentsmsAndCall',
-        {
+          }
+        });
+
+        await fetchEvents(); // Refresh after adding
+      } else {
+        await axios.get('http://localhost:9997/reminder/sendUrgentsmsAndCall', {
           headers: {
             Authorization: token,
           },
           params: {
             Message: formData.description
           }
-        }
-      );
-    }
+        });
+      }
+
       setShowEventForm(false);
-    } catch(error) {
+    } catch (error) {
       setShowEventForm(false);
       console.error('Error creating event:', error);
     }
@@ -183,11 +175,12 @@ const AdminEvents = () => {
   };
 
   const filterEvents = (eventsList) => {
-    return eventsList.filter(event => 
+    return eventsList.filter(event =>
       event.eventTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.eventDescription.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
+
 
   const renderEventCard = (event, index) => (
     <EventCard key={event.eventId || `event-${index}`} $theme={theme}> {/* Fallback to event-${index} if eventId is undefined */}
