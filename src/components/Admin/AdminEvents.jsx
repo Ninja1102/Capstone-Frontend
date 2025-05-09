@@ -60,7 +60,7 @@ const AdminEvents = () => {
           featured: []
         };
 
-        const ADMIN_USER_ID = '681c32fccc57fc42d81613c2'; // Admin's fixed user ID
+        const ADMIN_USER_ID = '681cb71cb7e8c057857a1c67'; // Admin's fixed user ID
 
         allEvents.forEach(event => {
           const eventDate = new Date(event.eventDate);

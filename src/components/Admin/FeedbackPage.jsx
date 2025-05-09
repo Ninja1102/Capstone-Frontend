@@ -45,17 +45,25 @@ const LeftSection = styled.div`
   background-color: #c5cae9;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  text-align: center; /* Center content horizontally */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 
 const WelcomeText = styled.h1`
   font-size: 2rem;
   color: #1a237e;
+  margin-bottom: 0.5rem;
 `;
 
 const Description = styled.p`
   font-size: 1.1rem;
   color: #303f9f;
+  margin-top: 0;
 `;
+
 
 const RightSection = styled.div`
   flex: 2;

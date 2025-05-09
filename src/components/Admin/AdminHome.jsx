@@ -33,7 +33,7 @@ const AdminHome = () => {
   const userId = sessionStorage.getItem('userId');
 
   useEffect(() => {
-    if (!token || userId !== '681c32fccc57fc42d81613c2') {
+    if (!token || userId !== '681cb71cb7e8c057857a1c67') {
       navigate('/');
       return;
     }
